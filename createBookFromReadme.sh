@@ -6,7 +6,7 @@
 # -------------------- Utility Methods --------------------
 # Check for binaries
 function checkEnvironment(){
-    type gcsplit >/dev/null 2>&1 || { echo "Install 'gcsplit' first (e.g. via 'brew install coreutils')." >&2 && exit 1 ; }
+    type csplit >/dev/null 2>&1 || { echo "Install 'csplit' first (e.g. via 'brew install coreutils')." >&2 && exit 1 ; }
     type mdbook >/dev/null 2>&1 || { echo "Install 'mdbook' first (e.g. via 'cargo install mdbook')." >&2 && exit 1 ; }
 }
 
@@ -20,12 +20,12 @@ function cleanupBeforeStarting(){
 # Note:
 #   Get gcsplit via homebrew on mac: brew install coreutils
 function splitIntoChapters(){
-    gcsplit --prefix='Chapter_' --suffix-format='%d.md' --elide-empty-files README.md '/^## /' '{*}' -q
+   csplit --prefix='Chapter_' --suffix-format='%d.md' --elide-empty-files README.md '/^## /' '{*}' -q
 }
 
 # Moves generated chapters into src directory
 function moveChaptersToSrcDir(){
-    for f in Chapter_*.md; do 
+    for f in Chapter_*.md; do
         mv $f src/$f
     done
 }
@@ -36,7 +36,7 @@ function createSummary(){
     touch SUMMARY.md
     echo '# Summary' > SUMMARY.md
     echo "" >> SUMMARY.md
-    for f in $(ls -tr | grep Chapter_); do
+    for f in $(ls | grep Chapter_ | sort -nk 2 -t _ ); do
         # Get the first line of the file
         local firstLine=$(sed -n '1p' $f)
         local cleanTitle=$(echo $firstLine | cut -c 3-)
@@ -49,7 +49,7 @@ function createSummary(){
 # Note:
 #     Install mdBook as per instructions in their repo https://github.com/rust-lang/mdBook
 function buildAndServeBookLocally(){
-    mdBook build && mdBook serve --open
+    mdbook build && mdbook serve -i $1 #--open # input holder ip by argv
 }
 
 # -------------------- Steps to create the mdBook version --------------------
